@@ -99,3 +99,7 @@ Prompt sheet:
   no input images, brands, people, or copyrighted characters.
 - Source PNG and prompt sidecar live in `assets/src/`; optimized WebP/AVIF are
   shipped by the site. Generated imagery is disclosed in the footer.
+
+The circular lens/registration icon is an original hand-authored SVG using
+only geometric paths (`public/icon/source.svg`); PNG sizes are mechanical
+exports from that source for the browser manifest.

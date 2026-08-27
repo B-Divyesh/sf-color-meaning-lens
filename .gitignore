@@ -1,6 +1,9 @@
 node_modules/
 dist/
+.wxt/
 .env
 *.log
 graphify-out/
 .DS_Store
+.factory/lighthouse.json
+.factory/mobile-proof.png
