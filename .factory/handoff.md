@@ -54,7 +54,7 @@ Verification on 2026-08-27:
 - Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100,
   SEO 100; FCP 1.1 s, LCP 1.1 s, TBT 0 ms, CLS 0. INP was not observed in the
   synthetic no-input run; the measured max potential input delay was 70 ms.
-- Bundles: landing initial JS 3.22 KB raw total, CSS 9.88 KB; extension 40.32
+- Bundles: landing initial JS 3.22 KB raw total, CSS 9.88 KB; extension 40.41
   KB total; mobile hero AVIF 6.4 KB and desktop AVIF 65.6 KB.
 
 ## Known gaps and next steps
