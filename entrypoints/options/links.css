@@ -1,0 +1,12 @@
+.primary-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 2px solid #164b78;
+  background: #164b78;
+  color: #fff;
+  box-shadow: 3px 3px 0 #171a1f;
+  font-weight: 750;
+  text-decoration: none;
+}

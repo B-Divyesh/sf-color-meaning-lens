@@ -1,0 +1,30 @@
+{
+  "name": "color-meaning-lens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:site": "vite --config site/vite.config.ts",
+    "build:site": "vite build --config site/vite.config.ts",
+    "build:extension": "wxt build",
+    "assets": "node scripts/optimize-image.mjs",
+    "package:extension": "node scripts/package-extension.mjs",
+    "build": "npm run clean && npm run assets && npm run build:site && npm run build:extension && npm run package:extension",
+    "clean": "node scripts/clean.mjs",
+    "test": "wxt prepare && tsc --noEmit && vitest run",
+    "test:watch": "vitest",
+    "verify:site": "node scripts/verify-site.mjs",
+    "verify:extension": "node scripts/verify-extension.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "archiver": "^7.0.1",
+    "playwright": "^1.62.1",
+    "sharp": "^0.35.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5",
+    "wxt": "^0.21.4"
+  }
+}
