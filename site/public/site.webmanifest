@@ -1,0 +1,8 @@
+{
+  "name": "Color Meaning Lens",
+  "short_name": "Meaning Lens",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F0E7",
+  "theme_color": "#164B78"
+}
