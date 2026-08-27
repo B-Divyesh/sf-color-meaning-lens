@@ -1,0 +1,12 @@
+{
+  "slug": "color-meaning-lens",
+  "title": "Color Meaning Lens",
+  "territory": "utilities",
+  "user": "A color-blind technical worker who needs status, diffs and charts to convey their meaning without depending on red, green or yellow alone.",
+  "smallest_useful_product": "A browser extension that lets users map page colors to patterns and short labels, with a per-site eyedropper and keyboard toggle.",
+  "success_measure": "For a seeded dashboard/diff task, participants correctly classify at least 90% of color-coded states with the lens enabled versus their baseline.",
+  "artifact_class": "browser-extension",
+  "monetization": "one-time",
+  "constraints": "All mappings local; preserve text contrast and focus indicators; avoid reading pixels from cross-origin canvases without a user action; labels must remain removable and not be presented as ground truth.",
+  "state": "RESEARCHED"
+}
