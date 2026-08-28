@@ -1,35 +1,34 @@
 # Color Meaning Lens — independent QA handoff
 
-## FAIL — public deployment does not meet acceptance
+## FAIL — deployment does not meet browser-extension acceptance
 
 **Verified candidate:** `8232e074ca5240f8d1ba2d6a5126509f6513d55d`
 **Required URL:** `https://color-meaning-lens.sociobot.in/`
-**Date:** 2026-08-27 UTC
+**Fresh verification date:** 2026-08-28 UTC
 
-The candidate artifact passed local install, unit/type checks, exact production
-build, site/extension Playwright smoke tests, axe serious/critical checks,
-390px mobile checks, focus/reduced-motion checks, PWA update plus offline
-reload, privacy/request inspection, and bundle budgets. It is **not releasable**
-because the mandatory public URL is unavailable and does not serve this
-candidate.
+The production homepage, legal pages, service worker, sampled hashed assets,
+and hero image now match the candidate byte-for-byte. The candidate also
+passes its clean local install, test, build, extension/site smoke, axe,
+mobile, focus, reduced-motion, privacy, offline-reload, and Lighthouse checks.
 
-### Blocking deployment defect
+It is nevertheless **not releasable**: the two public install/download links
+serve HTML instead of the extension ZIP. `GET
+/downloads/color-meaning-lens-chrome.zip` returns 200 `text/html`, 8,158 B,
+and is byte-identical to `index.html`; `unzip -t` exits 9. The locally built
+candidate ZIP is valid. This is a **P0 deployment defect** because users
+cannot install the advertised browser extension.
 
-- Normal Chromium navigation fails with `net::ERR_CERT_COMMON_NAME_INVALID`.
-  The certificate is for Azure `*.msha-slice-7-eus2-1-ase.p.azurewebsites.net`,
-  not `color-meaning-lens.sociobot.in`.
-- Diagnostic `curl -k` returned `404 Site Not Found` for `/` (2,667 B; SHA-256
-  `1e0878f232e32cf44e87ba00bd6957c1ebdfc9bc7c1c0a1389f8c62e6ae3311a`), while
-  local candidate `dist/site/index.html` is 8,158 B (SHA-256
-  `f39b3503e9a3eda8c59c38f93cda569340bcf43e289b0ab878d424c72b829fd0`).
-  The candidate hashed JS asset and `/sw.js` are also 404; only `/privacy/`
-  returned 200, indicating a partial/stale deployment.
+Required next step: deploy the real
+`dist/site/downloads/color-meaning-lens-chrome.zip`, exempt it from document
+fallback routing, then verify its content type and `unzip -t` at the public
+URL. Also address the P2 service-worker cache versioning and response-policy/
+immutable-cache observations recorded in `.factory/verification-2.md`.
 
-Required next step: bind the hostname to the complete `dist/site/` deployment,
-install the correct certificate, then rerun live QA. Full evidence is in
-`.factory/verification.md`.
+Full fresh evidence: `.factory/verification-2.md`. The prior TLS/404 report
+in `.factory/verification.md` is historical and has been superseded by this
+new deployment state.
 
-## Original builder handoff (superseded by the FAIL above)
+## Original builder handoff (superseded by independent QA)
 
 ## Shipped
 
