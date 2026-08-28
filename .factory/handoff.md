@@ -1,60 +1,37 @@
-# Color Meaning Lens — independent QA handoff
+# Color Meaning Lens — repair handoff
 
-## FAIL — deployment does not meet browser-extension acceptance
+**Status:** released; no known release blockers.
 
-**Verified candidate:** `8232e074ca5240f8d1ba2d6a5126509f6513d55d`
-**Required URL:** `https://color-meaning-lens.sociobot.in/`
-**Fresh verification date:** 2026-08-28 UTC
+**Repair commits:** `3382e0d9eed33530e33424326d50574fe20e9b2c`
+and `8e3b9bd03c3c4dc34f8371f3607dcc5225d4d0c5` on `main`.
 
-The production homepage, legal pages, service worker, sampled hashed assets,
-and hero image now match the candidate byte-for-byte. The candidate also
-passes its clean local install, test, build, extension/site smoke, axe,
-mobile, focus, reduced-motion, privacy, offline-reload, and Lighthouse checks.
+**Production URL:** <https://color-meaning-lens.sociobot.in/>
 
-It is nevertheless **not releasable**: the two public install/download links
-serve HTML instead of the extension ZIP. `GET
-/downloads/color-meaning-lens-chrome.zip` returns 200 `text/html`, 8,158 B,
-and is byte-identical to `index.html`; `unzip -t` exits 9. The locally built
-candidate ZIP is valid. This is a **P0 deployment defect** because users
-cannot install the advertised browser extension.
+## What was repaired
 
-Required next step: deploy the real
-`dist/site/downloads/color-meaning-lens-chrome.zip`, exempt it from document
-fallback routing, then verify its content type and `unzip -t` at the public
-URL. Also address the P2 service-worker cache versioning and response-policy/
-immutable-cache observations recorded in `.factory/verification-2.md`.
+- The static deployment build now produces the site, MV3 build, and
+  `dist/site/downloads/color-meaning-lens-chrome.zip` together. A clean static
+  deploy can no longer omit the advertised extension package.
+- Added `staticwebapp.config.json` to exclude `/downloads/*` and ZIP files from
+  document fallback. The live package is now a real binary download, not the
+  HTML shell.
+- Added CSP, Permissions-Policy, frame protection, `nosniff`, immutable cache
+  policy for hashed assets/packages, and revalidation for the service worker.
+- The service worker is generated from the built asset graph. Its cache name is
+  content-versioned (`color-meaning-lens-b94d3d56b694c976` in this release),
+  precaches the hashed shell assets, removes stale product caches, and claims
+  updates immediately.
+- Replaced the Azure-ambiguous `.webmanifest` filename with
+  `site.webmanifest.json`, served live as `application/json`.
+- Added local and live regression verifiers. They test the exact ZIP route and
+  its missing-file behavior, package magic bytes, MIME/cache/security headers,
+  response policy, mobile keyboard/focus/reduced-motion behavior, privacy
+  origins, service-worker update/offline behavior, and public deployment
+  identity.
 
-Full fresh evidence: `.factory/verification-2.md`. The prior TLS/404 report
-in `.factory/verification.md` is historical and has been superseded by this
-new deployment state.
+## Verification
 
-## Original builder handoff (superseded by independent QA)
-
-## Shipped
-
-- WXT + TypeScript Manifest V3 extension with a compact popup, full settings
-  page, browser action, and `Alt+Shift+L` command.
-- Local per-site mappings with useful PASS/dots, WARN/stripes, and
-  FAIL/crosshatch defaults. Users can add, edit, disable, reset, and remove
-  mappings.
-- On-page user-action color sampler using the EyeDropper API, plus a DOM
-  element-picker fallback. Both open an on-page editor and save locally.
-- Reversible, pointer-transparent overlays that add pattern, symbol, and label
-  redundancy without editing page source. Focused elements are skipped so
-  native focus indicators remain visible. Canvas pixels are never read.
-- Responsive static product site, interactive seeded proof sheet, install
-  guide, privacy page, terms page, web app manifest, offline service worker,
-  robots/sitemap, and downloadable packaged extension.
-- Optional $12 one-time Sociobot supporter license. Return-token capture,
-  once-daily verification cache, restore field, revoked/invalid handling, and
-  offline fallback follow the billing contract. It unlocks only named local
-  setup snapshots; core accessibility features stay free. No product ID is
-  hardcoded.
-- Original generated halftone hero in AVIF/WebP variants and a hand-authored
-  extension icon. Full prompt and provenance are in `.factory/design.md` and
-  `assets/src/inspection-proof.prompt.json`.
-
-## Run and verify
+Clean verification on 2026-08-28 UTC (Node 22.23.2, npm 10.9.8):
 
 ```sh
 npm ci
@@ -62,40 +39,49 @@ npm test
 npm run build
 npm run verify:site
 npm run verify:extension
+npm run verify:live
+unzip -t dist/site/downloads/color-meaning-lens-chrome.zip
+npm audit --audit-level=high
 ```
 
-Build output:
+- `npm ci`: 269 packages installed; `npm audit --audit-level=high`: 0
+  vulnerabilities.
+- `npm test`: strict TypeScript plus 5/5 Vitest tests passed.
+- `npm run build`: site, versioned service worker, MV3 extension, and ZIP built
+  successfully. Site initial JS is 3.21 KB raw, primary CSS 9.88 KB raw, and
+  the mobile AVIF remains 6.4 KB; all are within the product budgets.
+- `npm run verify:site`: `/`, `/privacy/`, and `/terms/` have one `h1`/`main`,
+  `lang=en`, titles, alt coverage, no console errors, and no axe
+  serious/critical issues. At 390 × 844 there is 0 px overflow; Space toggles
+  the demo, focus is a 3 px outline, and reduced motion reports `0s` transition
+  with automatic scrolling. It also passed a simulated changed-service-worker
+  controller update and offline reload.
+- `npm run verify:extension`: loaded MV3 content script rendered its starter
+  mapping, runtime toggle removed it, options rendered three starter mappings,
+  and no console errors occurred.
+- `unzip -t`: passed for the local package.
+- `npm run verify:live`: passed against the production hostname for desktop,
+  390 px mobile, keyboard, reduced motion, axe serious/critical, privacy, live
+  headers, and active service worker. Normal loads made only same-origin
+  requests.
+- Live package evidence: `200 application/zip`, `Content-Disposition:
+  attachment`, 23,175 bytes; `unzip -t` passed. Live and local SHA-256 both are
+  `f4d76d7695f3e3ba2c97283f6da71ffc8132ea0d8ceed9868e3937edd0a1cacb`.
+  The live response has CSP, Permissions-Policy, `X-Frame-Options: DENY`, and
+  immutable cache control.
 
-- Static deploy root: `dist/site/index.html`
-- Download: `dist/site/downloads/color-meaning-lens-chrome.zip`
-- Unpacked extension: `dist/extension/chrome-mv3/`
+## Deployment
 
-Verification on 2026-08-27:
+Deployed with `/opt/fleet/lib/deploy-static.sh color-meaning-lens dist/site`.
+Azure Static Web Apps deployment `6064338e-58b7-42e7-b064-169ad0727a05`
+succeeded; the configured custom domain returned HTTPS 200 immediately after
+deployment.
 
-- `npm test`: TypeScript strict check plus 5/5 Vitest tests passed.
-- `npm run build`: site, extension, icons, imagery, and ZIP built cleanly.
-- `npm audit --audit-level=high`: 0 vulnerabilities.
-- Playwright + axe on `/`, `/privacy/`, and `/terms/`: no console errors, no
-  serious/critical issues, exactly one `h1` and `main`, valid `lang`/title/alt.
-- 390 × 844 viewport: 0 px horizontal overflow; demo interaction passed.
-- Loaded-extension Chromium smoke test: content script injected, starter PASS
-  mapping rendered, runtime toggle removed the mark, options page rendered all
-  three starter mappings, and no console errors occurred.
-- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100,
-  SEO 100; FCP 1.1 s, LCP 1.1 s, TBT 0 ms, CLS 0. INP was not observed in the
-  synthetic no-input run; the measured max potential input delay was 70 ms.
-- Bundles: landing initial JS 3.22 KB raw total, CSS 9.88 KB; extension 40.41
-  KB total; mobile hero AVIF 6.4 KB and desktop AVIF 65.6 KB.
+## Known gap
 
-## Known gaps and next steps
-
-- The factory must register the product/return URL with the Sociobot billing
-  service before checkout can complete in production. Verification failures
-  leave the free tool usable and show a quiet retry message.
-- The downloadable ZIP is an unpacked/developer-mode Chromium package. Store
-  signing and listing are deployment work outside this repository.
-- The lens intentionally handles computed DOM colors, not pixels painted
-  inside canvas, video, or cross-origin images. Dense pages are capped at the
-  first 1,800 elements and 120 simultaneous marks to avoid degrading the host.
-- The EyeDropper API depends on browser support; the element picker is the
-  supported fallback.
+A fresh Lighthouse CLI attempt against the live page was made with the pinned
+Playwright Chromium binary, but that browser tab crashed in this container
+before results were emitted. This is the same container-level Lighthouse
+failure mode recorded by the prior verifier; it is not presented as a score.
+The successful Playwright/axe desktop and 390 px checks above are the formal
+browser evidence for this repair.
