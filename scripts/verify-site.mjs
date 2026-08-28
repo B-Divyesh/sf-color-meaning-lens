@@ -19,8 +19,8 @@ function deploymentHeaders(path) {
     headers['content-disposition'] = 'attachment';
   }
   if (path === '/sw.js') headers['cache-control'] = 'no-cache';
-  if (path === '/site.webmanifest') {
-    headers['content-type'] = 'application/manifest+json; charset=utf-8';
+  if (path === '/site.webmanifest.json') {
+    headers['content-type'] = 'application/json';
     headers['cache-control'] = 'public, max-age=86400';
   }
   return headers;
@@ -99,8 +99,8 @@ try {
   if (missingZip.status() !== 404) throw new Error('Missing ZIP was rewritten to the app shell instead of returning 404.');
   const asset = await desktopContext.request.get(`http://127.0.0.1:4173${(await readFile(join(root, 'index.html'), 'utf8')).match(/\/assets\/[^"']+\.js/)?.[0]}`);
   if (asset.headers()['cache-control'] !== 'public, max-age=31536000, immutable') throw new Error('Hashed asset cache policy is not immutable.');
-  const manifest = await desktopContext.request.get('http://127.0.0.1:4173/site.webmanifest');
-  if (!manifest.headers()['content-type']?.startsWith('application/manifest+json')) throw new Error('Web manifest media type is not configured.');
+  const manifest = await desktopContext.request.get('http://127.0.0.1:4173/site.webmanifest.json');
+  if (!manifest.headers()['content-type']?.startsWith('application/json')) throw new Error('Web manifest media type is not configured.');
   const home = await desktopContext.request.get('http://127.0.0.1:4173/');
   if (!home.headers()['content-security-policy'] || !home.headers()['permissions-policy'] || home.headers()['x-frame-options'] !== 'DENY') throw new Error('Response security policy is incomplete.');
 

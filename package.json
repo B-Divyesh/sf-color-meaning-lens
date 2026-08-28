@@ -16,6 +16,7 @@
     "test": "wxt prepare && tsc --noEmit && vitest run",
     "test:watch": "vitest",
     "verify:site": "node scripts/verify-site.mjs",
+    "verify:live": "node scripts/verify-live.mjs",
     "verify:extension": "node scripts/verify-extension.mjs"
   },
   "devDependencies": {

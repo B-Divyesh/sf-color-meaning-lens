@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 const siteRoot = resolve('dist/site');
 const template = await readFile(resolve('site/sw-template.js'), 'utf8');
 const pages = ['index.html', 'privacy/index.html', 'terms/index.html'];
-const referenced = new Set(['/', '/privacy/', '/terms/', '/site.webmanifest', '/favicon.svg']);
+const referenced = new Set(['/', '/privacy/', '/terms/', '/site.webmanifest.json', '/favicon.svg']);
 const fileForUrl = (url) => resolve(siteRoot, url === '/' ? 'index.html' : `${url.slice(1)}${url.endsWith('/') ? 'index.html' : ''}`);
 
 for (const page of pages) {
