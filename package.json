@@ -7,7 +7,7 @@
     "dev": "wxt",
     "dev:site": "vite --config site/vite.config.ts",
     "build:site:app": "vite build --config site/vite.config.ts && node scripts/build-service-worker.mjs",
-    "build:site": "npm run build:site:app && npm run build:extension && npm run package:extension",
+    "build:site": "wxt prepare && npm run build:site:app && npm run build:extension && npm run package:extension",
     "build:extension": "wxt build",
     "assets": "node scripts/optimize-image.mjs",
     "package:extension": "node scripts/package-extension.mjs",
@@ -16,6 +16,7 @@
     "test": "wxt prepare && tsc --noEmit && vitest run",
     "test:watch": "vitest",
     "verify:site": "node scripts/verify-site.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
     "verify:live": "node scripts/verify-live.mjs",
     "verify:extension": "node scripts/verify-extension.mjs"
   },

@@ -14,7 +14,7 @@ let lens: SiteLens;
 
 function escapeHtml(value: string) { const span = document.createElement('span'); span.textContent = value; return span.innerHTML; }
 function mappingRow(mapping: SiteLens['mappings'][number], index: number) {
-  return `<article class="mapping" data-index="${index}"><div class="swatch" style="background:${mapping.color}" title="${mapping.color}"></div><label>Color<input class="color" value="${mapping.color}" inputmode="text" aria-label="Mapping color"></label><label>Label<input class="label" value="${escapeHtml(mapping.label)}" maxlength="16" aria-label="Short label"></label><label>Pattern<select class="pattern" aria-label="Pattern"><option value="dots" ${mapping.pattern === 'dots' ? 'selected' : ''}>Dots · ${mapping.symbol}</option><option value="stripes" ${mapping.pattern === 'stripes' ? 'selected' : ''}>Stripes · ${mapping.symbol}</option><option value="crosshatch" ${mapping.pattern === 'crosshatch' ? 'selected' : ''}>Crosshatch · ${mapping.symbol}</option><option value="solid" ${mapping.pattern === 'solid' ? 'selected' : ''}>Soft solid · ${mapping.symbol}</option></select></label><button class="danger remove" type="button" aria-label="Remove ${escapeHtml(mapping.label)} mapping">Remove</button></article>`;
+  return `<article class="mapping" data-index="${index}"><div class="swatch" style="background:${mapping.color}" title="${mapping.color}"></div><label>Color<input class="color" value="${mapping.color}" inputmode="text" spellcheck="false" autocomplete="off" aria-describedby="color-error-${index}" aria-label="Mapping color"><span class="color-error" id="color-error-${index}" role="status" aria-live="polite"></span></label><label>Label<input class="label" value="${escapeHtml(mapping.label)}" maxlength="16" aria-label="Short label"></label><label>Pattern<select class="pattern" aria-label="Pattern"><option value="dots" ${mapping.pattern === 'dots' ? 'selected' : ''}>Dots · ${mapping.symbol}</option><option value="stripes" ${mapping.pattern === 'stripes' ? 'selected' : ''}>Stripes · ${mapping.symbol}</option><option value="crosshatch" ${mapping.pattern === 'crosshatch' ? 'selected' : ''}>Crosshatch · ${mapping.symbol}</option><option value="solid" ${mapping.pattern === 'solid' ? 'selected' : ''}>Soft solid · ${mapping.symbol}</option></select></label><button class="danger remove" type="button" aria-label="Remove ${escapeHtml(mapping.label)} mapping">Remove</button></article>`;
 }
 
 async function activeHost() {
@@ -38,17 +38,30 @@ function supporterMarkup() {
 }
 
 function readRows() {
+  let repairedColor: string | null = null;
   document.querySelectorAll<HTMLElement>('.mapping').forEach((row) => {
     const index = Number(row.dataset.index); const mapping = lens.mappings[index]; if (!mapping) return;
-    const color = normalizeHex(row.querySelector<HTMLInputElement>('.color')!.value); if (color) mapping.color = color;
+    const colorInput = row.querySelector<HTMLInputElement>('.color')!;
+    const colorError = row.querySelector<HTMLElement>('.color-error')!;
+    const color = normalizeHex(colorInput.value);
+    if (color) {
+      mapping.color = color;
+      colorInput.value = color;
+      colorError.textContent = '';
+    } else {
+      colorInput.value = mapping.color;
+      colorError.textContent = `Use a 3- or 6-digit hexadecimal color. Restored ${mapping.color}.`;
+      repairedColor ??= mapping.color;
+    }
     mapping.label = row.querySelector<HTMLInputElement>('.label')!.value.trim().toUpperCase() || 'NOTE';
     mapping.pattern = row.querySelector<HTMLSelectElement>('.pattern')!.value as Pattern;
   });
+  return repairedColor;
 }
 
 async function persist(message = 'Saved locally.') {
-  readRows(); lens.enabled = document.querySelector<HTMLSelectElement>('#site-enabled')?.value !== 'off'; config.sites[host] = lens; await saveConfig(config);
-  const target = document.querySelector('#message'); if (target) target.textContent = message;
+  const repairedColor = readRows(); lens.enabled = document.querySelector<HTMLSelectElement>('#site-enabled')?.value !== 'off'; config.sites[host] = lens; await saveConfig(config);
+  const target = document.querySelector('#message'); if (target) target.textContent = repairedColor ? `That is not a valid hex color. ${repairedColor} was restored; no invalid color was saved.` : message;
 }
 
 function bind() {

@@ -40,8 +40,30 @@ try {
   await options.locator('h1').waitFor();
   const optionsState = { h1: await options.locator('h1').count(), starterMappings: await options.locator('.mapping').count() };
   if (optionsState.h1 !== 1 || optionsState.starterMappings !== 3) throw new Error(`Options smoke test failed: ${JSON.stringify(optionsState)}`);
+  await options.locator('#add').press('Enter');
+  const review = options.locator('.mapping').last();
+  await review.locator('.color').fill('#2563EB');
+  await review.locator('.color').press('Tab');
+  await review.locator('.label').fill('REVIEW');
+  await review.locator('.label').press('Tab');
+  await review.locator('.pattern').selectOption('stripes');
+  await options.waitForFunction(async () => {
+    const saved = await chrome.storage.local.get('lensConfig:v1');
+    return Object.values(saved['lensConfig:v1']?.sites ?? {}).some((site) => site.mappings?.some((mapping) => mapping.label === 'REVIEW' && mapping.color === '#2563EB' && mapping.pattern === 'stripes'));
+  });
+  await review.locator('.color').fill('not-a-hex');
+  await review.locator('.color').press('Tab');
+  const invalidColorRecovery = {
+    displayed: await review.locator('.color').inputValue(),
+    message: await review.locator('.color-error').textContent(),
+    saved: await worker.evaluate(async () => {
+      const stored = await chrome.storage.local.get('lensConfig:v1');
+      return Object.values(stored['lensConfig:v1']?.sites ?? {}).some((site) => site.mappings?.some((mapping) => mapping.label === 'REVIEW' && mapping.color === '#2563EB'));
+    })
+  };
+  if (invalidColorRecovery.displayed !== '#2563EB' || !invalidColorRecovery.message?.includes('Restored #2563EB') || !invalidColorRecovery.saved) throw new Error(`Invalid color recovery failed: ${JSON.stringify(invalidColorRecovery)}`);
   if (errors.length) throw new Error(`Extension console errors: ${errors.join('; ')}`);
-  console.log(JSON.stringify({ contentScriptLoaded: true, starterMappingRendered: Number(marked), toggleRemovedMarks: true, optionsState, consoleErrors: errors }, null, 2));
+  console.log(JSON.stringify({ contentScriptLoaded: true, starterMappingRendered: Number(marked), toggleRemovedMarks: true, optionsState, invalidColorRecovery, consoleErrors: errors }, null, 2));
 } finally {
   await context.close();
   server.close();
