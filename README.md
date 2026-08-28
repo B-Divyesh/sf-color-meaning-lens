@@ -26,6 +26,9 @@ Requires Node 20 or newer.
 npm ci
 npm test
 npm run build
+npm run verify:package
+npm run verify:site
+npm run verify:extension
 ```
 
 `npm run build` outputs the static deploy at `dist/site/index.html`, the
