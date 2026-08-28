@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "wxt",
     "dev:site": "vite --config site/vite.config.ts",
-    "build:site": "vite build --config site/vite.config.ts",
+    "build:site:app": "vite build --config site/vite.config.ts && node scripts/build-service-worker.mjs",
+    "build:site": "npm run build:site:app && npm run build:extension && npm run package:extension",
     "build:extension": "wxt build",
     "assets": "node scripts/optimize-image.mjs",
     "package:extension": "node scripts/package-extension.mjs",
-    "build": "npm run clean && npm run assets && npm run build:site && npm run build:extension && npm run package:extension",
+    "build": "npm run clean && npm run assets && npm run build:site",
     "clean": "node scripts/clean.mjs",
     "test": "wxt prepare && tsc --noEmit && vitest run",
     "test:watch": "vitest",
@@ -20,7 +21,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "archiver": "^7.0.1",
-    "playwright": "^1.62.1",
+    "playwright": "1.58.2",
     "sharp": "^0.35.4",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",

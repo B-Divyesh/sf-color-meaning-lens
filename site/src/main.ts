@@ -36,6 +36,6 @@ const incoming = captureLicenseFromUrl();
 const existing = cachedLicense();
 if (incoming) void check(incoming, true); else if (existing?.token) void check(existing.token);
 
-if ('serviceWorker' in navigator && location.protocol === 'https:') addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => undefined));
+if ('serviceWorker' in navigator && window.isSecureContext) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => undefined));
 
 export { LICENSE_KEY, VERDICT_KEY };

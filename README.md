@@ -32,6 +32,12 @@ npm run build
 unpacked extension at `dist/extension/chrome-mv3/`, and the installable archive
 at `dist/site/downloads/color-meaning-lens-chrome.zip`.
 
+The static deployment command is intentionally `npm run build:site`: it builds
+the landing site, MV3 extension, and ZIP together so the advertised download
+cannot be omitted from a clean deploy. The deploy root also includes
+`staticwebapp.config.json`, which keeps `/downloads/*.zip` out of the document
+fallback and applies the site's security and cache policy.
+
 For development:
 
 ```sh
